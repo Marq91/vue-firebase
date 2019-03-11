@@ -1,7 +1,7 @@
 <template>
     <v-layout justify-center align-center>
         <v-flex xs12 sm8 md6 lg5 xl4>
-            <v-slide-x-transition mode="out-in">
+            <v-slide-x-transition mode="out-in" @enter="enter">
                 <!-- Seccion Registro -->
                 <v-card v-if="vista == 1" :key="1" class="elevation-7">
                     <v-toolbar color="primary" dark card>
@@ -10,12 +10,13 @@
                         </v-toolbar-title>
                     </v-toolbar>
                     <v-card-text>
-                        <v-text-field label="Email"></v-text-field>
-                        <v-text-field label="Password" type="password"></v-text-field>
+                        <v-text-field @blur="$v.f1.email.$touch()" :error-messages="erroresEmail" v-model="f1.email" label="Email"></v-text-field>
+                        <v-text-field @blur="$v.f1.password.$touch()" :error-messages="erroresPassword" v-model="f1.password" label="Password" type="password"></v-text-field>
+                        <v-text-field @keyup.enter="siguiente(1)" @blur="$v.f1.repetirPassword.$touch()" :error-messages="erroresRepetirPassword" v-model="f1.repetirPassword" label="Repetir Password" type="password"></v-text-field>
                     </v-card-text>
                     <v-card-text>
                         <v-layout justify-end>
-                            <v-btn @click="vista++" color="secondary">Siguiente</v-btn>
+                            <v-btn :drepressed="$v.f1.$invalid" :disabled="$v.f1.$invalid" @click="siguiente(1)" color="secondary">Siguiente</v-btn>
                         </v-layout>
                     </v-card-text>
                 </v-card>
@@ -27,12 +28,21 @@
                         </v-toolbar-title>
                     </v-toolbar>
                     <v-card-text>
-                        <v-text-field label="Nombres"></v-text-field>
-                        <v-text-field label="Apellidos"></v-text-field>
+                        <v-text-field @blur="$v.f2.nombres.$touch()" :error-messages="erroresNombres" v-model="f2.nombres" label="Nombres"></v-text-field>
+                        <v-text-field @keyup.enter="siguiente(2)" @blur="$v.f2.apellidos.$touch()" :error-messages="erroresApellidos" v-model="f2.apellidos" label="Apellidos"></v-text-field>
                     </v-card-text>
                     <v-card-text>
-                        <v-layout justify-end>
-                            <v-btn @click="vista++" color="secondary">Siguiente</v-btn>
+                        <v-layout>
+                            <v-flex xs6>
+                                <v-layout justify-start>
+                                    <v-btn @click="vista--">Atrás</v-btn>
+                                </v-layout>
+                            </v-flex>
+                            <v-flex xs6>
+                                <v-layout justify-end>
+                                    <v-btn @click="siguiente(2)" :drepressed="$v.f2.$invalid" :disabled="$v.f2.$invalid" color="secondary">Siguiente</v-btn>
+                                </v-layout>
+                            </v-flex>
                         </v-layout>
                     </v-card-text>
                 </v-card>
@@ -45,12 +55,21 @@
                     </v-toolbar>
                     <v-card-text>
                         <v-layout justify-center>
-                            <v-date-picker v-model="fechaNacimiento" reactive locale="es-cl" class="elevation-5"></v-date-picker>
+                            <v-date-picker ref="calendario" :max="fechaMaxima" v-model="fechaNacimiento" reactive locale="es-cl" class="elevation-5"></v-date-picker>
                         </v-layout>
                     </v-card-text>
                     <v-card-text>
-                        <v-layout justify-end>
-                            <v-btn color="secondary">Registrarse</v-btn>
+                        <v-layout>
+                            <v-flex xs6>
+                                <v-layout justify-start>
+                                    <v-btn @click="vista--">Atrás</v-btn>
+                                </v-layout>
+                            </v-flex>
+                            <v-flex xs6>
+                                <v-layout justify-end>
+                                    <v-btn @click="registrar" :drepressed="$v.fechaNacimiento.$invalid" :disabled="$v.fechaNacimiento.$invalid" color="secondary">Registrarse</v-btn>
+                                </v-layout>
+                            </v-flex>
                         </v-layout>
                     </v-card-text>
                 </v-card>    
@@ -60,11 +79,141 @@
 </template>
 
 <script>
+
+import { required, email, minLength, maxLength, sameAs } from 'vuelidate/lib/validators'
+import { nombreCompuesto } from '@/utilidades/validaciones'
+
 export default {
     data() {
         return {
-            vista: 1,
-            fechaNacimiento: null
+            vista: 2,
+            f1: {
+                email: '',
+                password: '',
+                repetirPassword: ''
+            },
+            f2: {
+                nombres: '',
+                apellidos: ''
+            },
+            fechaNacimiento: null,
+            fechaMaxima: null
+        }
+    },
+    validations: {
+        f1: {
+            email: {
+                required,
+                email
+            },
+            password: {
+                required,
+                minLength: minLength(6),
+                maxLength: maxLength(20)
+            },
+            repetirPassword: {
+                sameAs: sameAs('password')
+            }
+        },
+        f2: {
+            nombres: {
+                required,
+                minLength: minLength(3),
+                maxLength: maxLength(20),
+                nombreCompuesto
+            },
+            apellidos: {
+                required,
+                minLength: minLength(3),
+                maxLength: maxLength(20),
+                nombreCompuesto
+            }
+        },
+        fechaNacimiento: {
+            required
+        }
+    },
+    created() {
+        let fechaActual = new Date()
+        this.fechaMaxima = new Date(fechaActual.setFullYear(fechaActual.getFullYear() -13))
+            .toISOString()
+            .substr(0, 10)
+    },
+    methods: {
+        siguiente(vista) {
+            switch (vista) {
+                case 1:
+                    if (this.$v.f1.$invalid) {
+                        this.$v.f1.$touch()
+                        return
+                    }
+                    else{
+                        this.vista++
+                    }
+                    break
+                case 2:
+                    if (this.$v.f2.$invalid) {
+                        this.$v.f2.$touch()
+                        return
+                    }
+                    else{
+                        this.vista++
+                    }
+                    break
+                default:
+                    break;
+            }
+        },
+        registrar() {
+            if (this.$v.fechaNacimiento.$invalid) { return }
+
+            alert('Registrando...')
+        },
+        enter() {
+            if (this.vista == 3 && !this.fechaNacimiento) {
+                this.$refs.calendario.activePicker = 'YEAR'
+            }
+        }
+    },
+    computed: {
+        erroresEmail() { //Errores f1
+            let errores = []
+            if(!this.$v.f1.email.$dirty) { return errores }
+            if(!this.$v.f1.email.required) { errores.push('Ingresa tu email.') }
+            if(!this.$v.f1.email.email) { errores.push('Ingresa un email valido.') }
+            return errores
+        },
+        erroresPassword() {
+            let errores = []
+            if(!this.$v.f1.password.$dirty) { return errores }
+            if(!this.$v.f1.password.required) { errores.push('Ingresa tu password.') }
+            if(!this.$v.f1.password.minLength) { errores.push('Ingresa almenos 6 caracteres.') }
+            if(!this.$v.f1.password.maxLength) { errores.push('Ingresa máximo 20 caracteres.') }
+            return errores
+        },
+        erroresRepetirPassword() {
+            let errores = []
+            if(!this.$v.f1.repetirPassword.$dirty) { return errores }
+            if(!this.$v.f1.repetirPassword.sameAs) { errores.push('Las contraseñas no coinciden.') }
+            return errores
+        },
+        erroresNombres() { //Errores f2
+            let errores = []
+            if(!this.$v.f2.nombres.$dirty) { return errores }
+            if(!this.$v.f2.nombres.required) { errores.push('Ingresa tu nombre.') }
+            if(!this.$v.f2.nombres.minLength) { errores.push('Ingresa al menos 3 caracteres.') }
+            if(!this.$v.f2.nombres.maxLength) { errores.push('Ingresa máximo 20 caracteres.') }
+            if(!this.$v.f2.nombres.nombreCompuesto) { errores.push('Ingresa un nombre válido.') }
+            return errores
+        },
+        erroresApellidos() { //Errores f2
+            let errores = []
+            if(!this.$v.f2.apellidos.$dirty) { return errores }
+            if(!this.$v.f2.apellidos.required) { errores.push('Ingresa tu apellido.') }
+            if(!this.$v.f2.apellidos.minLength) { errores.push('Ingresa al menos 3 caracteres.') }
+            if(!this.$v.f2.apellidos.maxLength) { errores.push('Ingresa máximo 20 caracteres.') }
+            if(!this.$v.f2.apellidos.nombreCompuesto) { errores.push('Ingresa un apellido válido.') }
+            return errores
         }
     }
 }
