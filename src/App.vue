@@ -3,7 +3,7 @@
     <v-navigation-drawer v-model="menu" app temporary>
       <v-list>
         <!--Home -->
-        <v-list-tile @click="seleccionar('home')">
+        <v-list-tile :to="{ path: '/' }">
           <v-list-tile-action>
             <v-icon>home</v-icon>
           </v-list-tile-action>
@@ -12,7 +12,7 @@
           </v-list-tile-content>
         </v-list-tile>
         <!--Perfil -->
-        <v-list-tile v-if="usuario" @click="seleccionar('perfil')">
+        <v-list-tile v-if="usuario" :to="{ name: 'perfil' }">
           <v-list-tile-action>
             <v-icon>account_circle</v-icon>
           </v-list-tile-action>
@@ -21,7 +21,7 @@
           </v-list-tile-content>
         </v-list-tile>
         <!-- Login -->
-        <v-list-tile v-if="!usuario" @click="seleccionar('login')">
+        <v-list-tile v-if="!usuario" :to="{ name: 'login' }">
           <v-list-tile-action>
             <v-icon>arrow_forward</v-icon>
           </v-list-tile-action>
@@ -42,17 +42,19 @@
     </v-navigation-drawer>
     <v-toolbar color="primary" dark app>
       <v-toolbar-side-icon @click="menu = !menu"></v-toolbar-side-icon>
-      <v-toolbar-title @click="componenteActual = 'home'" class="headline logo">
+      <v-toolbar-title @click="$router.push({ name: 'home' })" class="headline logo">
         <span>{{ titulo }}</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <span v-if="usuario">{{ usuario.nombres }}</span>
+      <router-link class="nombre" :to="{ name: 'perfil' }">
+        <span v-if="usuario">{{ usuario.nombres }}</span>
+      </router-link>
     </v-toolbar>
 
     <v-content>
       <v-container fluid fill-height>
         <v-slide-y-transition mode="out-in">
-          <component :is="componenteActual"></component>
+          <router-view></router-view>
         </v-slide-y-transition>
       </v-container>
     </v-content>
@@ -106,24 +108,20 @@ export default {
   data () {
     return {
       titulo: 'Santiago Cine',
-      componenteActual: 'home',
       menu: false
     }
   },
   computed: {
-    ...mapState(['usuario', 'notificacion', 'ocupado'])
+    ...mapState(['notificacion', 'ocupado']),
+    ...mapState('sesion', ['usuario'])
   },
   methods: {
     ...mapMutations(['ocultarNotificacion']),
-    ...mapActions(['cerrarSesion']),
-    seleccionar(nombre) {
-      this.componenteActual = nombre
-      this.menu = false
-    },
+    ...mapActions('sesion',['cerrarSesion']),
     salir() { // Las Acciones se llaman con dispatch(), tambien podrian enviarse argumentos como en mutations, pero en este caso no hay.
       this.cerrarSesion()
       this.menu = false
-
+      this.$router.push({ name: 'login' })
     }
   }
 }
@@ -138,5 +136,10 @@ export default {
   cursor: pointer;
 }
 
+.nombre {
+  color: white;
+  text-decoration: none;
+  font-size: 1.2rem;
+}
 
 </style>
