@@ -1,6 +1,23 @@
-# vue-firebase
+# Vue-Firebase
 
 Desarrollado con Vuejs y Firebase como backend, el proyecto simula el sitio web para reservas de un cine o teatro.
+
+El proyecto esta en desarrollo y hasta el momento contine: 
+
+Sitema de Rutas:
+  * Vue Router. 
+  * Guards, para proteccion de urls.
+  * Rutas dinamicas
+
+Sesion de Usuario y JWT:
+  * Sesion firebase Persistence 
+  * JWT almacenado mediante Vuex
+  * Login mediante Facebook, Google y Correo electronico.
+  
+Vuetify:
+  * Maquetacion, gradientes con mycolor.space
+  * Integracion de Datepicker vuetify Materialice.
+
 
 https://santiago-cine.firebaseapp.com/
 
