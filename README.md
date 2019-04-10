@@ -1,5 +1,8 @@
 # vue-firebase
 
+Vuejs project and Firebase that simulate the reservation of an theater or a cinema.
+
+
 ## Project setup
 ```
 npm install
