@@ -7,7 +7,7 @@ require("firebase/functions");
 
 // Initialize Firebase
 var config = {
-    apiKey: "AIzaSyA__MzBA8L3WLD_EMrbOcMAvJzsR2t0nmQ",
+    apiKey: "****",
     authDomain: "santiago-cine.firebaseapp.com",
     databaseURL: "https://santiago-cine.firebaseio.com",
     projectId: "santiago-cine",
