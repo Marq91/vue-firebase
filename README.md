@@ -1,6 +1,6 @@
 # vue-firebase
 
-Vuejs project and Firebase that simulate the reservation of an theater or a cinema.
+Desarrollado con Vuejs y Firebase como backend, el proyecto simula el sitio web para reservas de un cine o teatro.
 
 https://santiago-cine.firebaseapp.com/
 
